@@ -4,12 +4,13 @@
 
 {% block body %}
 <div class="container my-2">
+    <h1 class="my-4">Hello {{ controller_name }}! ✅</h1>
     <div class="row mb-4">
         <div class="col-md-3">
             <form action="{{ path('reports_index') }}" method="get">
                 <div class="form-group mb-2">
-                    <label class="text-muted" for="account_id">Please enter the Account ID you'd like to display:</label>
-                    <input class="form-control" type="text" name="account_id" id="account_id" />
+                    <label class="text-muted" for="accountId">Please enter the Account ID you'd like to display:</label>
+                    <input class="form-control" type="text" name="accountId" id="accountId" />
                 </div>
 
                 <button type="submit" class="btn btn-success shadow">GET DATA</button>
