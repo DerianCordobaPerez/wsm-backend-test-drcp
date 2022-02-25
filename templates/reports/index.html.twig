@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Reports!{% endblock %}
+
+{% block body %}
+<div class="container my-2">
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <form action="{{ path('reports_index') }}" method="get">
+                <div class="form-group mb-2">
+                    <label class="text-muted" for="account_id">Please enter the Account ID you'd like to display:</label>
+                    <input class="form-control" type="text" name="account_id" id="account_id" />
+                </div>
+
+                <button type="submit" class="btn btn-success shadow">GET DATA</button>
+                <a href="{{ path('reports_index') }}" class="btn btn-success shadow">SHOW ALL</a>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <span class="text-muted">
+            Aggregated performance for All
+            <span class="fw-bold">Active</span>
+            accounts is listed below:
+        </span>
+
+        <hr>
+    </div>
+
+    {% if reports|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <tr class="fw-bold">
+                    <th>Account Name</th>
+                    <th>Account ID</th>
+                    <th>Spend</th>
+                    <th>Clicks</th>
+                    <th>Impressions</th>
+                    <th>Cost per Click</th>
+                </tr>
+
+                {% for report in reports %}
+                    <tr>
+                        <td>{{ report.accountName }}</td>
+                        <td>{{ report.accountId }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <span class="fw-bold">There are no reports in the database!</span>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
