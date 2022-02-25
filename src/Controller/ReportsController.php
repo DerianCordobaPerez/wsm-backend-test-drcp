@@ -2,42 +2,39 @@
 
 namespace App\Controller;
 
+use App\Repository\ReportRepository;
+use App\Services\MongoDBService;
 use MongoDB\Client;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ReportsController extends AbstractController
 {
-    #[Route('/reports', name: 'reports_index', methods: ['GET'])]
-    public function index(): Response
-    {
-        $client = new Client();
-        $accounts = $client->selectCollection('demo-db', 'accounts');
+    use MongoDBService;
 
-        // All accounts with metrics
-        $reports = $accounts->aggregate([
-            ['$lookup' => [
-                'from' => 'metrics',
-                'localField' => 'accountId',
-                'foreignField' => 'accountId',
-                'as' => 'metrics',
-            ]],
-            ['$unwind' => '$metrics'],
-            ['$group' => [
-                '_id' => '$_id',
-                'accountName' => ['$first' => '$accountName'],
-                'accountId' => ['$first' => '$accountId'],
-                'spend' => ['$sum' => '$metrics.spend'],
-                'clicks' => ['$sum' => '$metrics.clicks'],
-                'impressions' => ['$sum' => '$metrics.impressions'],
-                'costPerClicks' => ['$avg' => '$metrics.costPerClick'],
-            ]],
-            ['$sort' => ['spend' => -1]],
-        ]);
+    private ReportRepository $reportRepository;
+
+    public function __construct()
+    {
+        // Inject from MongoDBService
+        $this->connect();
+        $this->setDatabase('demo-db');
+
+        $this->reportRepository = new ReportRepository();
+    }
+
+    #[Route('/reports', name: 'reports_index', methods: ['GET'])]
+    public function index(Request $request): Response
+    {
+        $accounts = $this->getCollection('accounts');
+        $accountId = $request->query->get('accountId');
+        $reports = $this->reportRepository->findReports($accounts, $accountId);
 
         return $this->render('reports/index.html.twig', [
-            'reports' => $reports->toArray(),
+            'controller_name' => 'ReportsController',
+            'reports' => $reports,
         ]);
     }
 }
