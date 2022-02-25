@@ -42,8 +42,12 @@
 
                 {% for report in reports %}
                     <tr>
-                        <td>{{ report.accountName }}</td>
-                        <td>{{ report.accountId }}</td>
+                        <td>{{ report['accountName'] }}</td>
+                        <td>{{ report['accountId'] }}</td>
+                        <td>{{ report['spend'] }}</td>
+                        <td>{{ report['clicks'] }}</td>
+                        <td>{{ report['impressions'] }}</td>
+                        <td>{{ report['costPerClicks'] }}</td>
                     </tr>
                 {% endfor %}
             </table>

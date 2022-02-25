@@ -14,28 +14,30 @@ class ReportsController extends AbstractController
     {
         $client = new Client();
         $accounts = $client->selectCollection('demo-db', 'accounts');
-        $metrics = $client->selectCollection('demo-db', 'metrics');
 
-        // Use Lookup the metrics by account ID
-        $metricsByAccount = $metrics->aggregate([
+        // All accounts with metrics
+        $reports = $accounts->aggregate([
             ['$lookup' => [
-                'from' => 'accounts',
+                'from' => 'metrics',
                 'localField' => 'accountId',
                 'foreignField' => 'accountId',
-                'as' => 'account',
+                'as' => 'metrics',
             ]],
-            ['$unwind' => '$account'],
+            ['$unwind' => '$metrics'],
             ['$group' => [
-                '_id' => '$accountId',
-                'costPerClick' => ['$avg' => '$costPerClick'],
-
+                '_id' => '$_id',
+                'accountName' => ['$first' => '$accountName'],
+                'accountId' => ['$first' => '$accountId'],
+                'spend' => ['$sum' => '$metrics.spend'],
+                'clicks' => ['$sum' => '$metrics.clicks'],
+                'impressions' => ['$sum' => '$metrics.impressions'],
+                'costPerClicks' => ['$avg' => '$metrics.costPerClick'],
             ]],
+            ['$sort' => ['spend' => -1]],
         ]);
 
-        $reports = $accounts->find(['status' => 'ACTIVE'])->toArray();
-
         return $this->render('reports/index.html.twig', [
-            'reports' => $reports,
+            'reports' => $reports->toArray(),
         ]);
     }
 }
