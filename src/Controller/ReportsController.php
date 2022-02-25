@@ -2,39 +2,38 @@
 
 namespace App\Controller;
 
+use App\Repository\ReportRepository;
+use App\Services\MongoDBService;
 use MongoDB\Client;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ReportsController extends AbstractController
 {
-    #[Route('/reports', name: 'reports_index', methods: ['GET'])]
-    public function index(): Response
+    use MongoDBService;
+
+    private ReportRepository $reportRepository;
+
+    public function __construct()
     {
-        $client = new Client();
-        $accounts = $client->selectCollection('demo-db', 'accounts');
-        $metrics = $client->selectCollection('demo-db', 'metrics');
+        // Inject from MongoDBService
+        $this->connect();
+        $this->setDatabase('demo-db');
 
-        // Use Lookup the metrics by account ID
-        $metricsByAccount = $metrics->aggregate([
-            ['$lookup' => [
-                'from' => 'accounts',
-                'localField' => 'accountId',
-                'foreignField' => 'accountId',
-                'as' => 'account',
-            ]],
-            ['$unwind' => '$account'],
-            ['$group' => [
-                '_id' => '$accountId',
-                'costPerClick' => ['$avg' => '$costPerClick'],
+        $this->reportRepository = new ReportRepository();
+    }
 
-            ]],
-        ]);
-
-        $reports = $accounts->find(['status' => 'ACTIVE'])->toArray();
+    #[Route('/reports', name: 'reports_index', methods: ['GET'])]
+    public function index(Request $request): Response
+    {
+        $accounts = $this->getCollection('accounts');
+        $accountId = $request->query->get('accountId');
+        $reports = $this->reportRepository->findReports($accounts, $accountId);
 
         return $this->render('reports/index.html.twig', [
+            'controller_name' => 'ReportsController',
             'reports' => $reports,
         ]);
     }
