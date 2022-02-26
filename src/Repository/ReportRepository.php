@@ -58,7 +58,7 @@ class ReportRepository
             ]],
             $this->group,
             ['$addFields' => [
-                'costPerClicks' => ['$divide' => ['$costPerClick', '$clicks']],
+                'costPerClicks' => ['$divide' => ['$spend', '$clicks']],
             ]],
             ['$sort' => ['spend' => -1]],
         ]);
