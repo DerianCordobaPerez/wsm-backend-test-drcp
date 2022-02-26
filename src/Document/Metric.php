@@ -30,10 +30,10 @@ class Metric
     #[MongoDB\Field(type: Type::INT)]
     private int $conversions;
 
-    #[MongoDB\Field(type: Type::FLOAT)]
+    #[MongoDB\Field(type: Type::DECIMAL128)]
     private float $costPerClick;
 
-    #[MongoDB\Field(type: Type::FLOAT)]
+    #[MongoDB\Field(type: Type::DECIMAL128)]
     private float $spend;
 
     public function __construct(
